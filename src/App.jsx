@@ -1,1 +1,6 @@
-export default function App(){}
+import currency from './mock/latest-currency.json'
+
+export default function App(){
+  
+
+}
