@@ -1,28 +1,76 @@
-import currency from './mock/latest-currency.json'
+import CurrencyForm from './CurrencyForm'
+import { useCallback, useEffect, useState } from 'react'
+import currencyData from './mock/latest-currency.json'
 
 export default function App() {
+	const [fromCurrency, setFromCurrency] = useState('USD')
+	const [toCurrency, setToCurrency] = useState('EUR')
+
+	const [fromValue, setFromValue] = useState(0)
+	const [toValue, setToValue] = useState(0)
+
+	const calculateCurrency = useCallback(
+		({ rates, fromCurrency, toCurrency, amount }) => {
+			var rates = currencyData.rates
+			var fromRate = rates[fromCurrency]
+			var toRate = rates[toCurrency]
+			return (toRate / fromRate) * amount
+		},
+		[]
+	)
+
+	useEffect(() => {
+		if (!fromValue || !fromCurrency) {
+			setToValue(0)
+			return
+		}
+
+		var exchangeRate = calculateCurrency({
+			rates: currencyData.rates,
+			fromCurrency: fromCurrency,
+			toCurrency: toCurrency,
+			amount: fromValue,
+		})
+		setToValue(exchangeRate)
+	}, [fromCurrency, fromValue])
+
 	return (
-		<div>
+		<div style={{ display: 'flex', gap: 20 }}>
 			<div
 				style={{
 					display: 'flex',
 					flexDirection: 'column',
+					placeItems: 'center',
 					gap: 10,
-					border: '2px solid darkgray',
-					padding: 20,
-					borderRadius: 10,
 				}}
 			>
-				<select style={{ textAlign: 'center' }}>
-					{Object.keys(currency.rates).map((key) => {
-						return (
-							<option key={key} value={key}>
-								{key}
-							</option>
-						)
-					})}
-				</select>
-				<input type='number' style={{ textAlign: 'center' }} />
+				<span>From</span>
+				<CurrencyForm
+					currency={fromCurrency}
+					setCurrency={setFromCurrency}
+					value={fromValue}
+					setValue={setFromValue}
+					currencyData={currencyData}
+					editable
+				/>
+			</div>
+			<div
+				style={{
+					display: 'flex',
+					flexDirection: 'column',
+					placeItems: 'center',
+					gap: 10,
+				}}
+			>
+				<span>To</span>
+				<CurrencyForm
+					currency={toCurrency}
+					setCurrency={setToCurrency}
+					value={toValue}
+					setValue={() => {}}
+					currencyData={currencyData}
+					editable={false}
+				/>
 			</div>
 		</div>
 	)
